@@ -924,17 +924,19 @@
         }
         
         // Restart the app
-        function restartApp() {
+        async function restartApp() {
             currentIndex = 0;
             likedCats = [];
-            
+
             cardStack.style.display = 'block';
             document.querySelector('.progress-container').style.display = 'block';
             document.querySelector('.instructions').style.display = 'block';
             document.querySelector('.action-buttons').style.display = 'flex';
             document.querySelector('.cat-fact').style.display = 'block';
             summaryScreen.style.display = 'none';
-            
+
+            // Fetch new photos
+            await loadCats();
             createCards();
             updateProgress();
             showRandomCatFact();
