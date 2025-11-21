@@ -488,6 +488,32 @@
                 height: 80%;
             }
         }
+
+        /* Music button styles */
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            box-shadow: 0 4px 8px var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 100;
+        }
+
+        .music-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
     </style>
 </head>
 <body>
@@ -539,7 +565,8 @@
             </button>
         </div>
     </div>
-    <button onclick="document.querySelector('audio').play()">Play Music</button>
+    <!-- Music Play Button -->
+    <button class="music-btn" onclick="document.querySelector('audio').play()">🎵 Play Music</button>
 
     <script>
         // Configuration
