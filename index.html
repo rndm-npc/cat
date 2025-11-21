@@ -170,13 +170,6 @@
             padding: 0 10px;
         }
 
-        .cat-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--accent);
-        }
-
         .swipe-indicator {
             position: absolute;
             top: 20px;
@@ -624,7 +617,6 @@
                 cats = results.map((result, index) => ({
                     id: result.id,
                     url: `https://cataas.com/cat/${result.id}`,
-                    name: generateCatName()
                 }));
             } catch (error) {
                 console.error('Error loading cats:', error);
@@ -632,17 +624,10 @@
                 cats = Array(TOTAL_CATS).fill().map((_, i) => ({
                     id: i,
                     url: `https://placekitten.com/400/500?image=${i + 1}`,
-                    name: generateCatName()
                 }));
             }
         }
         
-        // Generate cute cat names
-        function generateCatName() {
-            const names = ["Whiskers", "Mittens", "Luna", "Simba", "Bella", "Oliver", "Chloe", "Leo", "Lucy", "Max", 
-                          "Lily", "Charlie", "Nala", "Milo", "Sophie", "Jack", "Zoe", "Tiger", "Cleo", "Oscar"];
-            return names[Math.floor(Math.random() * names.length)];
-        }
         
         // Create card elements for each cat
         function createCards() {
@@ -656,9 +641,8 @@
                 card.className = 'card';
                 card.dataset.index = index;
                 card.innerHTML = `
-                    <img src="${cat.url}" alt="${cat.name}" onerror="this.src='https://placekitten.com/400/500?image=${index + 1}'">
+                    <img src="${cat.url}" onerror="this.src='https://placekitten.com/400/500?image=${index + 1}'">
                     <div class="card-info">
-                        <div class="cat-name">${cat.name}</div>
                         <div>Cat #${index + 1}</div>
                     </div>
                 `;
@@ -866,7 +850,7 @@
                 likedCats.forEach(cat => {
                     const catElement = document.createElement('div');
                     catElement.className = 'liked-cat';
-                    catElement.innerHTML = `<img src="${cat.url}" alt="${cat.name}">`;
+                    catElement.innerHTML = `<img src="${cat.url}"`;
                     likedCatsGrid.appendChild(catElement);
                 });
             }
