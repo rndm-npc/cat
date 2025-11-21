@@ -3,23 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Preference Swiper</title>
+    <title>Purrfect Match - Cat Preference Swiper</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Comic Neue', cursive, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #FFB6C1;
+            --secondary: #FFD1DC;
+            --accent: #FF69B4;
+            --text: #5D4037;
+            --light: #FFF9F9;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --like: #4CAF50;
+            --dislike: #F44336;
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #FFE4E6 0%, #FFCDD2 50%, #FFB6C1 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            color: #333;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .cat-paw-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.1;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50,30 C55,20 65,15 75,20 C85,25 90,35 85,45 C80,55 70,60 60,55 C50,50 45,40 50,30 Z' fill='%23FF69B4'/%3E%3Ccircle cx='65' cy='25' r='5' fill='%23FF69B4'/%3E%3Ccircle cx='75' cy='25' r='5' fill='%23FF69B4'/%3E%3C/svg%3E");
+            background-size: 150px;
         }
 
         .container {
@@ -32,11 +57,42 @@
             position: relative;
         }
 
-        h1 {
+        .header {
             text-align: center;
             margin-bottom: 20px;
-            color: #4a5568;
-            font-size: 1.8rem;
+            position: relative;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--text);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--secondary);
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::before, h1::after {
+            content: "🐾";
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+        }
+
+        h1::before {
+            left: -40px;
+        }
+
+        h1::after {
+            right: -40px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
         }
 
         .card-stack {
@@ -46,14 +102,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-bottom: 20px;
         }
 
         .card {
             width: 90%;
             height: 85%;
             background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+            box-shadow: 0 15px 30px var(--shadow);
             position: absolute;
             display: flex;
             flex-direction: column;
@@ -61,72 +118,135 @@
             transition: transform 0.3s ease;
             cursor: grab;
             user-select: none;
+            border: 8px solid white;
+            background: linear-gradient(to bottom, white 85%, var(--secondary) 100%);
         }
 
         .card:active {
             cursor: grabbing;
         }
 
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(to right, var(--primary), var(--accent), var(--primary));
+            z-index: 2;
+        }
+
         .card img {
             width: 100%;
-            height: 85%;
+            height: 80%;
             object-fit: cover;
+            border-radius: 15px 15px 0 0;
         }
 
         .card-info {
             padding: 15px;
             text-align: center;
             font-weight: 500;
-            color: #4a5568;
-            height: 15%;
+            color: var(--text);
+            height: 20%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            background-color: white;
+            position: relative;
+        }
+
+        .card-info::before {
+            content: "🐱";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            background: white;
+            padding: 0 10px;
+        }
+
+        .cat-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--accent);
         }
 
         .swipe-indicator {
             position: absolute;
             top: 20px;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 12px 20px;
+            border-radius: 30px;
             font-weight: bold;
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 10;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 3px solid white;
         }
 
         .like-indicator {
             right: 20px;
-            background-color: #48bb78;
+            background-color: var(--like);
             color: white;
+        }
+
+        .like-indicator::after {
+            content: " 😻";
         }
 
         .dislike-indicator {
             left: 20px;
-            background-color: #f56565;
+            background-color: var(--dislike);
             color: white;
+        }
+
+        .dislike-indicator::after {
+            content: " 🙀";
         }
 
         .action-buttons {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
+            gap: 40px;
+            margin-top: 20px;
             width: 100%;
         }
 
         .action-button {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 35px;
+            box-shadow: 0 8px 15px var(--shadow);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.3s;
+        }
+
+        .action-button:active::before {
+            transform: scale(1);
         }
 
         .action-button:active {
@@ -134,32 +254,76 @@
         }
 
         .dislike-btn {
-            background-color: #fed7d7;
-            color: #f56565;
+            background: linear-gradient(135deg, #FF8A80, #F44336);
+            color: white;
         }
 
         .like-btn {
-            background-color: #c6f6d5;
-            color: #48bb78;
+            background: linear-gradient(135deg, #80E27E, #4CAF50);
+            color: white;
         }
 
         .summary-screen {
             width: 100%;
             height: 100%;
             background-color: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 30px var(--shadow);
             display: none;
             flex-direction: column;
             align-items: center;
             overflow-y: auto;
+            border: 8px solid white;
+            background: linear-gradient(to bottom, white 90%, var(--secondary) 100%);
+            position: relative;
+        }
+
+        .summary-screen::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(to right, var(--primary), var(--accent), var(--primary));
+            z-index: 2;
+            border-radius: 15px 15px 0 0;
         }
 
         .summary-title {
             margin-bottom: 20px;
             text-align: center;
-            color: #4a5568;
+            color: var(--text);
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .summary-title::after {
+            content: "🐾";
+            position: absolute;
+            right: -40px;
+            top: 0;
+            font-size: 1.5rem;
+        }
+
+        .summary-title::before {
+            content: "🐾";
+            position: absolute;
+            left: -40px;
+            top: 0;
+            font-size: 1.5rem;
+        }
+
+        .summary-text {
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.2rem;
+            background: var(--light);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 10px var(--shadow);
+            width: 100%;
         }
 
         .liked-cats-grid {
@@ -167,14 +331,22 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             width: 100%;
+            margin-bottom: 20px;
         }
 
         .liked-cat {
             width: 100%;
             aspect-ratio: 1;
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 15px var(--shadow);
+            position: relative;
+            border: 5px solid white;
+            transition: transform 0.3s;
+        }
+
+        .liked-cat:hover {
+            transform: scale(1.05);
         }
 
         .liked-cat img {
@@ -183,46 +355,123 @@
             object-fit: cover;
         }
 
+        .liked-cat::after {
+            content: "😻";
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
         .restart-btn {
-            margin-top: 30px;
-            padding: 12px 30px;
-            background-color: #4299e1;
+            margin-top: 20px;
+            padding: 15px 35px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 8px 15px var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .restart-btn:active {
             transform: scale(0.98);
-            background-color: #3182ce;
+            box-shadow: 0 4px 8px var(--shadow);
         }
 
-        .progress-bar {
+        .progress-container {
             width: 90%;
-            height: 6px;
-            background-color: #e2e8f0;
-            border-radius: 3px;
-            margin-top: 20px;
+            margin: 20px 0;
+            background-color: var(--light);
+            border-radius: 20px;
+            height: 12px;
+            box-shadow: inset 0 2px 5px var(--shadow);
+            position: relative;
             overflow: hidden;
         }
 
         .progress {
             height: 100%;
-            background-color: #4299e1;
+            background: linear-gradient(to right, var(--primary), var(--accent));
             width: 0%;
             transition: width 0.3s ease;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .progress::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(-45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%, transparent);
+            background-size: 20px 20px;
+            animation: move 1s linear infinite;
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
         }
 
         .instructions {
             text-align: center;
             margin-top: 15px;
-            color: #718096;
-            font-size: 14px;
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 10px var(--shadow);
+        }
+
+        .floating-cats {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-cat {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.2;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .cat-fact {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-style: italic;
+            box-shadow: 0 5px 10px var(--shadow);
+            border-left: 5px solid var(--accent);
         }
 
         @media (max-width: 480px) {
@@ -231,31 +480,46 @@
             }
             
             h1 {
-                font-size: 1.5rem;
+                font-size: 2rem;
             }
             
             .action-button {
-                width: 60px;
-                height: 60px;
-                font-size: 25px;
+                width: 70px;
+                height: 70px;
+                font-size: 30px;
+            }
+
+            .card {
+                height: 80%;
             }
         }
     </style>
 </head>
 <body>
-    <h1>Cat Preference Swiper</h1>
+    <div class="cat-paw-bg"></div>
+    <div class="floating-cats" id="floatingCats"></div>
+    
     <div class="container">
+        <div class="header">
+            <h1>Purrfect Match</h1>
+            <p class="subtitle">Find your feline favorites! 😺</p>
+        </div>
+        
         <div class="card-stack" id="cardStack">
             <div class="swipe-indicator like-indicator">LIKE</div>
             <div class="swipe-indicator dislike-indicator">DISLIKE</div>
             <!-- Cards will be dynamically inserted here -->
         </div>
         
-        <div class="progress-bar">
+        <div class="progress-container">
             <div class="progress" id="progress"></div>
         </div>
         
-        <p class="instructions">Swipe right to like, left to dislike</p>
+        <div class="cat-fact" id="catFact">
+            <i class="fas fa-paw"></i> Cats sleep for about 12-16 hours a day!
+        </div>
+        
+        <p class="instructions">Swipe right to like 😻, left to dislike 🙀</p>
         
         <div class="action-buttons">
             <button class="action-button dislike-btn" id="dislikeBtn">✕</button>
@@ -263,12 +527,16 @@
         </div>
         
         <div class="summary-screen" id="summaryScreen">
-            <h2 class="summary-title">Your Cat Preferences</h2>
-            <p id="summaryText">You liked <span id="likedCount">0</span> out of <span id="totalCount">0</span> cats</p>
+            <h2 class="summary-title">Your Purrfect Matches</h2>
+            <div class="summary-text" id="summaryText">
+                You liked <span id="likedCount">0</span> out of <span id="totalCount">0</span> cats!
+            </div>
             <div class="liked-cats-grid" id="likedCatsGrid">
                 <!-- Liked cats will be displayed here -->
             </div>
-            <button class="restart-btn" id="restartBtn">Start Over</button>
+            <button class="restart-btn" id="restartBtn">
+                <i class="fas fa-redo"></i> Start Over
+            </button>
         </div>
     </div>
 
@@ -276,6 +544,18 @@
         // Configuration
         const TOTAL_CATS = 10;
         const CATAAS_API_URL = 'https://cataas.com/cat?json=true';
+        const CAT_FACTS = [
+            "Cats have five toes on their front paws, but only four on the back ones!",
+            "A group of cats is called a clowder.",
+            "Cats can rotate their ears 180 degrees.",
+            "The oldest known pet cat existed 9,500 years ago.",
+            "A cat's nose print is unique, much like a human's fingerprint.",
+            "Cats spend 70% of their lives sleeping.",
+            "Cats have an extra organ that allows them to taste scents in the air.",
+            "The richest cat in the world had £7 million inherited from his owner.",
+            "Cats walk like camels and giraffes - they move both right feet first, then both left feet.",
+            "Cats can jump up to six times their length."
+        ];
         
         // State management
         let cats = [];
@@ -297,13 +577,37 @@
         const restartBtn = document.getElementById('restartBtn');
         const likeIndicator = document.querySelector('.like-indicator');
         const dislikeIndicator = document.querySelector('.dislike-indicator');
+        const catFact = document.getElementById('catFact');
+        const floatingCats = document.getElementById('floatingCats');
         
         // Initialize the app
         async function init() {
+            createFloatingCats();
             await loadCats();
             createCards();
             updateProgress();
             setupEventListeners();
+            showRandomCatFact();
+        }
+        
+        // Create floating cat emojis in the background
+        function createFloatingCats() {
+            const catEmojis = ["😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🐱"];
+            for (let i = 0; i < 15; i++) {
+                const cat = document.createElement('div');
+                cat.className = 'floating-cat';
+                cat.textContent = catEmojis[Math.floor(Math.random() * catEmojis.length)];
+                cat.style.left = `${Math.random() * 100}%`;
+                cat.style.animationDelay = `${Math.random() * 15}s`;
+                cat.style.fontSize = `${Math.random() * 20 + 20}px`;
+                floatingCats.appendChild(cat);
+            }
+        }
+        
+        // Show random cat fact
+        function showRandomCatFact() {
+            const randomFact = CAT_FACTS[Math.floor(Math.random() * CAT_FACTS.length)];
+            catFact.innerHTML = `<i class="fas fa-paw"></i> ${randomFact}`;
         }
         
         // Fetch cat images from CATAAS API
@@ -316,18 +620,27 @@
                 }
                 
                 const results = await Promise.all(promises);
-                cats = results.map(result => ({
+                cats = results.map((result, index) => ({
                     id: result.id,
-                    url: `https://cataas.com/cat/${result.id}`
+                    url: `https://cataas.com/cat/${result.id}`,
+                    name: generateCatName()
                 }));
             } catch (error) {
                 console.error('Error loading cats:', error);
                 // Fallback to placeholder images if API fails
                 cats = Array(TOTAL_CATS).fill().map((_, i) => ({
                     id: i,
-                    url: `https://placekitten.com/400/500?image=${i}`
+                    url: `https://placekitten.com/400/500?image=${i + 1}`,
+                    name: generateCatName()
                 }));
             }
+        }
+        
+        // Generate cute cat names
+        function generateCatName() {
+            const names = ["Whiskers", "Mittens", "Luna", "Simba", "Bella", "Oliver", "Chloe", "Leo", "Lucy", "Max", 
+                          "Lily", "Charlie", "Nala", "Milo", "Sophie", "Jack", "Zoe", "Tiger", "Cleo", "Oscar"];
+            return names[Math.floor(Math.random() * names.length)];
         }
         
         // Create card elements for each cat
@@ -342,8 +655,11 @@
                 card.className = 'card';
                 card.dataset.index = index;
                 card.innerHTML = `
-                    <img src="${cat.url}" alt="Cat ${index + 1}" onerror="this.src='https://placekitten.com/400/500?image=${index}'">
-                    <div class="card-info">Cat #${index + 1}</div>
+                    <img src="${cat.url}" alt="${cat.name}" onerror="this.src='https://placekitten.com/400/500?image=${index + 1}'">
+                    <div class="card-info">
+                        <div class="cat-name">${cat.name}</div>
+                        <div>Cat #${index + 1}</div>
+                    </div>
                 `;
                 cardStack.appendChild(card);
             });
@@ -505,9 +821,14 @@
                 currentIndex++;
                 updateProgress();
                 
+                // Show new cat fact every few cards
+                if (currentIndex % 3 === 0) {
+                    showRandomCatFact();
+                }
+                
                 // Check if we've reached the end
                 if (currentIndex >= cats.length) {
-                    showSummary();
+                    setTimeout(showSummary, 500);
                 }
             }, 300);
         }
@@ -528,21 +849,26 @@
         // Show summary screen with liked cats
         function showSummary() {
             cardStack.style.display = 'none';
-            document.querySelector('.progress-bar').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'none';
             document.querySelector('.instructions').style.display = 'none';
             document.querySelector('.action-buttons').style.display = 'none';
+            document.querySelector('.cat-fact').style.display = 'none';
             
             likedCount.textContent = likedCats.length;
             totalCount.textContent = cats.length;
             
             // Display liked cats
             likedCatsGrid.innerHTML = '';
-            likedCats.forEach(cat => {
-                const catElement = document.createElement('div');
-                catElement.className = 'liked-cat';
-                catElement.innerHTML = `<img src="${cat.url}" alt="Liked cat">`;
-                likedCatsGrid.appendChild(catElement);
-            });
+            if (likedCats.length === 0) {
+                likedCatsGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; font-size: 1.2rem;">No cats liked yet. Try again! 😿</p>';
+            } else {
+                likedCats.forEach(cat => {
+                    const catElement = document.createElement('div');
+                    catElement.className = 'liked-cat';
+                    catElement.innerHTML = `<img src="${cat.url}" alt="${cat.name}">`;
+                    likedCatsGrid.appendChild(catElement);
+                });
+            }
             
             summaryScreen.style.display = 'flex';
         }
@@ -553,13 +879,15 @@
             likedCats = [];
             
             cardStack.style.display = 'block';
-            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.progress-container').style.display = 'block';
             document.querySelector('.instructions').style.display = 'block';
             document.querySelector('.action-buttons').style.display = 'flex';
+            document.querySelector('.cat-fact').style.display = 'block';
             summaryScreen.style.display = 'none';
             
             createCards();
             updateProgress();
+            showRandomCatFact();
         }
         
         // Initialize the app when the page loads
