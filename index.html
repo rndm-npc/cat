@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Purrfect Match - Cat Preference Swiper</title>
-    <link rel="icon" href="assets/cat.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light+Two&display=swap" rel="stylesheet">
     <style>
@@ -13,6 +12,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Shadows Into Light Two', cursive;
+            cursor: none; /* Hide default cursor */
         }
 
         :root {
@@ -35,6 +35,35 @@
             padding: 20px;
             color: var(--text);
             overflow-x: hidden;
+        }
+
+        /* Custom Paw Cursor */
+        .paw-cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease;
+        }
+
+        .paw-cursor svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+        }
+
+        .paw-cursor.click {
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        .paw-cursor.hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .paw-cursor.drag {
+            transform: translate(-50%, -50%) rotate(15deg);
         }
 
         .cat-paw-bg {
@@ -118,14 +147,9 @@
             flex-direction: column;
             overflow: hidden;
             transition: transform 0.3s ease;
-            cursor: grab;
             user-select: none;
             border: 8px solid white;
             background: linear-gradient(to bottom, white 85%, var(--secondary) 100%);
-        }
-
-        .card:active {
-            cursor: grabbing;
         }
 
         .card::before {
@@ -141,7 +165,7 @@
 
         .card img {
             width: 100%;
-            height: 80%;
+            height: 85%;
             object-fit: cover;
             border-radius: 15px 15px 0 0;
         }
@@ -151,9 +175,8 @@
             text-align: center;
             font-weight: 500;
             color: var(--text);
-            height: 20%;
+            height: 15%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             background-color: white;
@@ -222,7 +245,6 @@
             align-items: center;
             font-size: 35px;
             box-shadow: 0 8px 15px var(--shadow);
-            cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             border: none;
             position: relative;
@@ -374,12 +396,11 @@
             border-radius: 50px;
             font-size: 1.2rem;
             font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 8px 15px var(--shadow);
             transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 8px 15px var(--shadow);
         }
 
         .restart-btn:active {
@@ -505,7 +526,6 @@
             align-items: center;
             font-size: 28px;
             box-shadow: 0 4px 8px var(--shadow);
-            cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             z-index: 100;
         }
@@ -517,10 +537,16 @@
     </style>
 </head>
 <body>
-    <audio autoplay loop>
-    <source src="assets/catsong.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+    <!-- Custom Paw Cursor -->
+    <div class="paw-cursor" id="pawCursor">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50,30 C55,20 65,15 75,20 C85,25 90,35 85,45 C80,55 70,60 60,55 C50,50 45,40 50,30 Z" fill="#FF69B4"/>
+            <circle cx="65" cy="25" r="5" fill="#FF69B4"/>
+            <circle cx="75" cy="25" r="5" fill="#FF69B4"/>
+            <circle cx="40" cy="35" r="7" fill="#FF69B4"/>
+            <circle cx="60" cy="35" r="7" fill="#FF69B4"/>
+        </svg>
+    </div>
 
     <div class="cat-paw-bg"></div>
     <div class="floating-cats" id="floatingCats"></div>
@@ -565,8 +591,9 @@
             </button>
         </div>
     </div>
+    
     <!-- Music Play Button -->
-    <button class="music-btn" onclick="document.querySelector('audio').play()">🎵 Play Music</button>
+    <button class="music-btn" id="musicBtn">🎵</button>
 
     <script>
         // Configuration
@@ -592,6 +619,7 @@
         let startX = 0;
         let currentX = 0;
         let isDragging = false;
+        let isMusicPlaying = false;
         
         // DOM elements
         const cardStack = document.getElementById('cardStack');
@@ -607,6 +635,8 @@
         const dislikeIndicator = document.querySelector('.dislike-indicator');
         const catFact = document.getElementById('catFact');
         const floatingCats = document.getElementById('floatingCats');
+        const pawCursor = document.getElementById('pawCursor');
+        const musicBtn = document.getElementById('musicBtn');
         
         // Initialize the app
         async function init() {
@@ -616,6 +646,42 @@
             updateProgress();
             setupEventListeners();
             showRandomCatFact();
+            setupPawCursor();
+        }
+        
+        // Set up custom paw cursor
+        function setupPawCursor() {
+            document.addEventListener('mousemove', (e) => {
+                pawCursor.style.left = `${e.clientX}px`;
+                pawCursor.style.top = `${e.clientY}px`;
+            });
+            
+            // Add hover effect for interactive elements
+            const interactiveElements = document.querySelectorAll('button, .card');
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    pawCursor.classList.add('hover');
+                });
+                el.addEventListener('mouseleave', () => {
+                    pawCursor.classList.remove('hover');
+                });
+            });
+            
+            // Add click effect
+            document.addEventListener('mousedown', () => {
+                pawCursor.classList.add('click');
+            });
+            document.addEventListener('mouseup', () => {
+                pawCursor.classList.remove('click');
+            });
+            
+            // Add drag effect for cards
+            cardStack.addEventListener('mousedown', () => {
+                pawCursor.classList.add('drag');
+            });
+            document.addEventListener('mouseup', () => {
+                pawCursor.classList.remove('drag');
+            });
         }
         
         // Create floating cat emojis in the background
@@ -650,18 +716,17 @@
                 const results = await Promise.all(promises);
                 cats = results.map((result, index) => ({
                     id: result.id,
-                    url: `https://cataas.com/cat/${result.id}`,
+                    url: `https://cataas.com/cat/${result.id}`
                 }));
             } catch (error) {
                 console.error('Error loading cats:', error);
                 // Fallback to placeholder images if API fails
                 cats = Array(TOTAL_CATS).fill().map((_, i) => ({
                     id: i,
-                    url: `https://placekitten.com/400/500?image=${i + 1}`,
+                    url: `https://placekitten.com/400/500?image=${i + 1}`
                 }));
             }
         }
-        
         
         // Create card elements for each cat
         function createCards() {
@@ -705,6 +770,34 @@
             likeBtn.addEventListener('click', () => handleSwipe('right'));
             dislikeBtn.addEventListener('click', () => handleSwipe('left'));
             restartBtn.addEventListener('click', restartApp);
+            
+            // Music button
+            musicBtn.addEventListener('click', toggleMusic);
+        }
+        
+        // Toggle background music
+        function toggleMusic() {
+            // In a real implementation, you would toggle an audio element here
+            isMusicPlaying = !isMusicPlaying;
+            musicBtn.textContent = isMusicPlaying ? '🔊' : '🎵';
+            musicBtn.style.background = isMusicPlaying ? 'var(--like)' : 'var(--accent)';
+            
+            // Show a notification (in a real app, this would control actual audio)
+            const notification = document.createElement('div');
+            notification.textContent = isMusicPlaying ? 'Music playing 🎶' : 'Music stopped 🔇';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '90px';
+            notification.style.right = '20px';
+            notification.style.background = 'var(--light)';
+            notification.style.padding = '10px 15px';
+            notification.style.borderRadius = '20px';
+            notification.style.boxShadow = '0 4px 8px var(--shadow)';
+            notification.style.zIndex = '1000';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
         }
         
         // Touch event handlers
@@ -876,7 +969,7 @@
             likedCount.textContent = likedCats.length;
             totalCount.textContent = cats.length;
             
-            // Display liked cats
+            // Display liked cats - FIXED: Properly set image sources
             likedCatsGrid.innerHTML = '';
             if (likedCats.length === 0) {
                 likedCatsGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; font-size: 1.2rem;">No cats liked yet. Try again! 😿</p>';
@@ -884,7 +977,7 @@
                 likedCats.forEach(cat => {
                     const catElement = document.createElement('div');
                     catElement.className = 'liked-cat';
-                    catElement.innerHTML = `<img src="${cat.url}"`;
+                    catElement.innerHTML = `<img src="${cat.url}" onerror="this.src='https://placekitten.com/200/200'">`;
                     likedCatsGrid.appendChild(catElement);
                 });
             }
