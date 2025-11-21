@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Preference Swiper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4a5568;
+            font-size: 1.8rem;
+        }
+
+        .card-stack {
+            width: 100%;
+            height: 70%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            width: 90%;
+            height: 85%;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card img {
+            width: 100%;
+            height: 85%;
+            object-fit: cover;
+        }
+
+        .card-info {
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            color: #4a5568;
+            height: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 20px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .like-indicator {
+            right: 20px;
+            background-color: #48bb78;
+            color: white;
+        }
+
+        .dislike-indicator {
+            left: 20px;
+            background-color: #f56565;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .action-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+        }
+
+        .dislike-btn {
+            background-color: #fed7d7;
+            color: #f56565;
+        }
+
+        .like-btn {
+            background-color: #c6f6d5;
+            color: #48bb78;
+        }
+
+        .summary-screen {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .summary-title {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4a5568;
+        }
+
+        .liked-cats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .liked-cat {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .liked-cat img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .restart-btn:active {
+            transform: scale(0.98);
+            background-color: #3182ce;
+        }
+
+        .progress-bar {
+            width: 90%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #4299e1;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-top: 15px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                height: 90vh;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .action-button {
+                width: 60px;
+                height: 60px;
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Cat Preference Swiper</h1>
+    <div class="container">
+        <div class="card-stack" id="cardStack">
+            <div class="swipe-indicator like-indicator">LIKE</div>
+            <div class="swipe-indicator dislike-indicator">DISLIKE</div>
+            <!-- Cards will be dynamically inserted here -->
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <p class="instructions">Swipe right to like, left to dislike</p>
+        
+        <div class="action-buttons">
+            <button class="action-button dislike-btn" id="dislikeBtn">✕</button>
+            <button class="action-button like-btn" id="likeBtn">❤</button>
+        </div>
+        
+        <div class="summary-screen" id="summaryScreen">
+            <h2 class="summary-title">Your Cat Preferences</h2>
+            <p id="summaryText">You liked <span id="likedCount">0</span> out of <span id="totalCount">0</span> cats</p>
+            <div class="liked-cats-grid" id="likedCatsGrid">
+                <!-- Liked cats will be displayed here -->
+            </div>
+            <button class="restart-btn" id="restartBtn">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const TOTAL_CATS = 10;
+        const CATAAS_API_URL = 'https://cataas.com/cat?json=true';
+        
+        // State management
+        let cats = [];
+        let currentIndex = 0;
+        let likedCats = [];
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        // DOM elements
+        const cardStack = document.getElementById('cardStack');
+        const progressBar = document.getElementById('progress');
+        const likeBtn = document.getElementById('likeBtn');
+        const dislikeBtn = document.getElementById('dislikeBtn');
+        const summaryScreen = document.getElementById('summaryScreen');
+        const likedCount = document.getElementById('likedCount');
+        const totalCount = document.getElementById('totalCount');
+        const likedCatsGrid = document.getElementById('likedCatsGrid');
+        const restartBtn = document.getElementById('restartBtn');
+        const likeIndicator = document.querySelector('.like-indicator');
+        const dislikeIndicator = document.querySelector('.dislike-indicator');
+        
+        // Initialize the app
+        async function init() {
+            await loadCats();
+            createCards();
+            updateProgress();
+            setupEventListeners();
+        }
+        
+        // Fetch cat images from CATAAS API
+        async function loadCats() {
+            try {
+                // We'll fetch multiple cat images
+                const promises = [];
+                for (let i = 0; i < TOTAL_CATS; i++) {
+                    promises.push(fetch(CATAAS_API_URL).then(response => response.json()));
+                }
+                
+                const results = await Promise.all(promises);
+                cats = results.map(result => ({
+                    id: result.id,
+                    url: `https://cataas.com/cat/${result.id}`
+                }));
+            } catch (error) {
+                console.error('Error loading cats:', error);
+                // Fallback to placeholder images if API fails
+                cats = Array(TOTAL_CATS).fill().map((_, i) => ({
+                    id: i,
+                    url: `https://placekitten.com/400/500?image=${i}`
+                }));
+            }
+        }
+        
+        // Create card elements for each cat
+        function createCards() {
+            cardStack.innerHTML = `
+                <div class="swipe-indicator like-indicator">LIKE</div>
+                <div class="swipe-indicator dislike-indicator">DISLIKE</div>
+            `;
+            
+            cats.forEach((cat, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = index;
+                card.innerHTML = `
+                    <img src="${cat.url}" alt="Cat ${index + 1}" onerror="this.src='https://placekitten.com/400/500?image=${index}'">
+                    <div class="card-info">Cat #${index + 1}</div>
+                `;
+                cardStack.appendChild(card);
+            });
+            
+            // Set z-index for proper stacking
+            document.querySelectorAll('.card').forEach((card, index) => {
+                card.style.zIndex = TOTAL_CATS - index;
+            });
+        }
+        
+        // Set up event listeners for swipe and button interactions
+        function setupEventListeners() {
+            // Touch events for mobile
+            cardStack.addEventListener('touchstart', handleTouchStart, { passive: false });
+            cardStack.addEventListener('touchmove', handleTouchMove, { passive: false });
+            cardStack.addEventListener('touchend', handleTouchEnd);
+            
+            // Mouse events for desktop
+            cardStack.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            // Button events
+            likeBtn.addEventListener('click', () => handleSwipe('right'));
+            dislikeBtn.addEventListener('click', () => handleSwipe('left'));
+            restartBtn.addEventListener('click', restartApp);
+        }
+        
+        // Touch event handlers
+        function handleTouchStart(e) {
+            if (currentIndex >= cats.length) return;
+            
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            currentX = startX;
+            isDragging = true;
+            
+            const currentCard = document.querySelector(`.card[data-index="${currentIndex}"]`);
+            currentCard.style.transition = 'none';
+        }
+        
+        function handleTouchMove(e) {
+            if (!isDragging || currentIndex >= cats.length) return;
+            
+            e.preventDefault();
+            const touch = e.touches[0];
+            currentX = touch.clientX;
+            
+            const deltaX = currentX - startX;
+            const currentCard = document.querySelector(`.card[data-index="${currentIndex}"]`);
+            
+            // Move the card
+            currentCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
+            
+            // Show swipe indicators
+            if (deltaX > 50) {
+                likeIndicator.style.opacity = Math.min(deltaX / 100, 1);
+                dislikeIndicator.style.opacity = 0;
+            } else if (deltaX < -50) {
+                dislikeIndicator.style.opacity = Math.min(Math.abs(deltaX) / 100, 1);
+                likeIndicator.style.opacity = 0;
+            } else {
+                likeIndicator.style.opacity = 0;
+                dislikeIndicator.style.opacity = 0;
+            }
+        }
+        
+        function handleTouchEnd() {
+            if (!isDragging || currentIndex >= cats.length) return;
+            
+            isDragging = false;
+            const deltaX = currentX - startX;
+            
+            // Determine if it's a swipe based on distance
+            if (Math.abs(deltaX) > 100) {
+                handleSwipe(deltaX > 0 ? 'right' : 'left');
+            } else {
+                // Reset card position if not swiped far enough
+                resetCardPosition();
+            }
+            
+            // Hide indicators
+            likeIndicator.style.opacity = 0;
+            dislikeIndicator.style.opacity = 0;
+        }
+        
+        // Mouse event handlers (for desktop)
+        function handleMouseDown(e) {
+            if (currentIndex >= cats.length) return;
+            
+            startX = e.clientX;
+            currentX = startX;
+            isDragging = true;
+            
+            const currentCard = document.querySelector(`.card[data-index="${currentIndex}"]`);
+            currentCard.style.transition = 'none';
+        }
+        
+        function handleMouseMove(e) {
+            if (!isDragging || currentIndex >= cats.length) return;
+            
+            currentX = e.clientX;
+            
+            const deltaX = currentX - startX;
+            const currentCard = document.querySelector(`.card[data-index="${currentIndex}"]`);
+            
+            // Move the card
+            currentCard.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.1}deg)`;
+            
+            // Show swipe indicators
+            if (deltaX > 50) {
+                likeIndicator.style.opacity = Math.min(deltaX / 100, 1);
+                dislikeIndicator.style.opacity = 0;
+            } else if (deltaX < -50) {
+                dislikeIndicator.style.opacity = Math.min(Math.abs(deltaX) / 100, 1);
+                likeIndicator.style.opacity = 0;
+            } else {
+                likeIndicator.style.opacity = 0;
+                dislikeIndicator.style.opacity = 0;
+            }
+        }
+        
+        function handleMouseUp() {
+            if (!isDragging || currentIndex >= cats.length) return;
+            
+            isDragging = false;
+            const deltaX = currentX - startX;
+            
+            // Determine if it's a swipe based on distance
+            if (Math.abs(deltaX) > 100) {
+                handleSwipe(deltaX > 0 ? 'right' : 'left');
+            } else {
+                // Reset card position if not swiped far enough
+                resetCardPosition();
+            }
+            
+            // Hide indicators
+            likeIndicator.style.opacity = 0;
+            dislikeIndicator.style.opacity = 0;
+        }
+        
+        // Handle swipe action (like or dislike)
+        function handleSwipe(direction) {
+            if (currentIndex >= cats.length) return;
+            
+            const currentCard = document.querySelector(`.card[data-index="${currentIndex}"]`);
+            currentCard.style.transition = 'transform 0.5s ease';
+            
+            // Animate card off screen
+            if (direction === 'right') {
+                currentCard.style.transform = 'translateX(500px) rotate(30deg)';
+                likedCats.push(cats[currentIndex]);
+            } else {
+                currentCard.style.transform = 'translateX(-500px) rotate(-30deg)';
+            }
+            
+            // Move to next card
+            setTimeout(() => {
+                currentIndex++;
+                updateProgress();
+                
+                // Check if we've reached the end
+                if (currentIndex >= cats.length) {
+                    showSummary();
+                }
+            }, 300);
+        }
+        
+        // Reset card position if not swiped far enough
+        function resetCardPosition() {
+            const currentCard = document.querySelector(`.card[data-index="${currentIndex}"]`);
+            currentCard.style.transition = 'transform 0.3s ease';
+            currentCard.style.transform = 'translateX(0) rotate(0)';
+        }
+        
+        // Update progress bar
+        function updateProgress() {
+            const progress = (currentIndex / cats.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        // Show summary screen with liked cats
+        function showSummary() {
+            cardStack.style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.querySelector('.instructions').style.display = 'none';
+            document.querySelector('.action-buttons').style.display = 'none';
+            
+            likedCount.textContent = likedCats.length;
+            totalCount.textContent = cats.length;
+            
+            // Display liked cats
+            likedCatsGrid.innerHTML = '';
+            likedCats.forEach(cat => {
+                const catElement = document.createElement('div');
+                catElement.className = 'liked-cat';
+                catElement.innerHTML = `<img src="${cat.url}" alt="Liked cat">`;
+                likedCatsGrid.appendChild(catElement);
+            });
+            
+            summaryScreen.style.display = 'flex';
+        }
+        
+        // Restart the app
+        function restartApp() {
+            currentIndex = 0;
+            likedCats = [];
+            
+            cardStack.style.display = 'block';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.instructions').style.display = 'block';
+            document.querySelector('.action-buttons').style.display = 'flex';
+            summaryScreen.style.display = 'none';
+            
+            createCards();
+            updateProgress();
+        }
+        
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
